@@ -185,6 +185,8 @@ public class CloudSigma2ComputeServiceAdapter implements
       try {
          logger.debug(">> creating server...");
 
+         String password = Optional.fromNullable(options.getVncPassword()).or(defaultVncPassword);
+
          serverInfo = api.createServer(new ServerInfo.Builder()
                .name(name)
                .cpu((int) hardware.getProcessors().get(0).getSpeed())
@@ -193,12 +195,12 @@ public class CloudSigma2ComputeServiceAdapter implements
                .nics(nics)
                .meta(metadata)
                .tags(tagIds)
-               .vncPassword(Optional.fromNullable(options.getVncPassword()).or(defaultVncPassword)).build());
+               .vncPassword(password).build());
 
          api.startServer(serverInfo.getUuid());
 
          return new NodeAndInitialCredentials<ServerInfo>(serverInfo, serverInfo.getUuid(), LoginCredentials.builder()
-               .build());
+               .password(password).build());
       } catch (Exception ex) {
          try {
             if (serverInfo != null) {
